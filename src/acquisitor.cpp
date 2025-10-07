@@ -1,12 +1,9 @@
 #include "acquisitor.hpp"
 #include <iostream>
 #include <chrono>
-#include <date/date.h>
-#include <date/tz.h>
 
 using namespace std;
 using namespace std::chrono;
-using namespace date;
 using json = nlohmann::json;
 
 int main() {
@@ -16,11 +13,11 @@ int main() {
   j["sd"] = 2;
 
   Acquisitor acq(j);
+  acq.setup();
   time_point<system_clock, nanoseconds> today =
-      floor<days>(system_clock::now());
+      floor<days>(system_clock::now()) - hours(2);
 
   cout << "size: " << acq.size() << endl << "capa: " << acq.capa() << endl;
-  time_point<system_clock, nanoseconds> tp = system_clock::now();
 
   acq.fill_buffer();
 

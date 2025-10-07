@@ -53,14 +53,13 @@ FetchContent_Declare(json
   GIT_SHALLOW    TRUE
 )
 
-set(BUILD_TZ_LIB ON CACHE INTERNAL "")
-FetchContent_Declare(date
-  GIT_REPOSITORY https://github.com/HowardHinnant/date.git
-  GIT_TAG        v3.0.4
+FetchContent_Declare(serialport
+  GIT_REPOSITORY https://github.com/pbosetti/serial.git
+  GIT_TAG        HEAD
   GIT_SHALLOW    TRUE
 )
 
-FetchContent_MakeAvailable(pugg json date)
+FetchContent_MakeAvailable(pugg json serialport)
 
 FetchContent_Populate(plugin 
   GIT_REPOSITORY https://github.com/pbosetti/mads_plugin.git
@@ -74,6 +73,7 @@ FetchContent_Populate(plugin
 include_directories(
   ${plugin_SOURCE_DIR}/src
   ${date_SOURCE_DIR}/include
+  ${serial_SOURCE_DIR}/include
 )
 
 
@@ -120,10 +120,10 @@ endif()
 include_directories(${json_SOURCE_DIR}/include)
 
 # These plugins are always build and use for testing
-add_plugin(buffered LIBS date-tz)
+add_plugin(buffered)
+add_plugin(buffered_sp LIBS serial)
 
 add_executable(acq_test ${SRC_DIR}/acquisitor.cpp)
-target_link_libraries(acq_test date-tz)
 
 # INSTALL ######################################################################
 if(APPLE)

@@ -22,14 +22,11 @@ Date: 2025-10-07
 #include <chrono>
 #include <tuple>
 #include <thread>
-#include <date/date.h>
-#include <date/tz.h>
 
 #define DEFAULT_SIZE 100
 
 using namespace std;
 using namespace std::chrono;
-using namespace date;
 using json = nlohmann::json;
 
 
@@ -62,7 +59,7 @@ public:
     time_point<system_clock, nanoseconds> time;
     T data;
 
-    double time_since(time_point<system_clock, nanoseconds> t0) {
+    double time_since(time_point<system_clock, nanoseconds> t0) const {
       return duration_cast<nanoseconds>(time - t0).count() / 1.0E9;
     }
   };
@@ -71,15 +68,13 @@ public:
     if (capa == 0) capa = _settings.value("capacity", DEFAULT_SIZE);
     _capa = capa;
     _data.reserve(_capa);
+  }
+  
+  // Initialize connections
+  virtual void setup() {
     double m = _settings.value("mean", 0);
     double sd = _settings.value("sd", 0);
     _rnd.set(m, sd);
-    setup();
-  }
-
-  // Initialize connections
-  virtual void setup() {
-
   }
 
   // Single acquisition
@@ -109,14 +104,14 @@ public:
     }
   }
 
-  auto &data() { return _data; }
-  T operator[](size_t i) { return _data[i]; }
-  size_t size() { return _data.size(); }
-  size_t capa() { return _capa; }
-  bool is_full() { return _data.size() == _capa; }
+  auto &data() const { return _data; }
+  T operator[](size_t i) const { return _data[i]; }
+  size_t size() const { return _data.size(); }
+  size_t capa() const { return _capa; }
+  bool is_full() const { return _data.size() == _capa; }
   void reset() { _data.clear(); }
 
-private:
+protected:
   json _settings;
   size_t _capa;
   vector<sample> _data;

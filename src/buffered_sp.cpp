@@ -19,7 +19,7 @@
 
 // other includes as needed here
 #include <chrono>
-#include "acquisitor.hpp"
+#include "serial_acq.hpp"
 
 // Define the name of the plugin
 #ifndef PLUGIN_NAME
@@ -70,16 +70,12 @@ public:
     _params.merge_patch(*(json *)params);
 
     _today = floor<chrono::days>(chrono::system_clock::now()) - hours(_params["tz_offset"]);
-    _acq = make_unique<Acquisitor<>>(_params);
+    _acq = make_unique<SerialportAcquisitor>(_params);
     
   }
 
   // Implement this method if you want to provide additional information
   map<string, string> info() override { 
-    // return a map of strings with additional information about the plugin
-    // it is used to print the information about the plugin when it is loaded
-    // by the agent
-    
     return {
       {"Capacity", to_string(_params["capacity"])},
       {"TZ offset", to_string(_params["tz_offset"])}
@@ -89,7 +85,7 @@ public:
 
 private:
   // Define the fields that are used to store internal resources
-  unique_ptr<Acquisitor<>> _acq;
+  unique_ptr<SerialportAcquisitor> _acq;
   chrono::time_point<chrono::system_clock, chrono::nanoseconds> _today;
 };
 
@@ -121,8 +117,9 @@ int main(int argc, char const *argv[]) {
 
   // Set example values to params
   params["capacity"] = 100;
-  params["mean"] = 10;
-  params["sd"] = 2;
+  params["port"] = "/dev/cu.usbmodem34B7DA5F9A5C2";
+  params["baud"] = 115200;
+  params["timeout"] = 100;
 
   // Set the parameters
   plugin.set_params(&params);
