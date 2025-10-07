@@ -28,7 +28,7 @@ else()
 endif()
 
 # PROJECT SETTINGS #############################################################
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 
@@ -53,7 +53,14 @@ FetchContent_Declare(json
   GIT_SHALLOW    TRUE
 )
 
-FetchContent_MakeAvailable(pugg json)
+set(BUILD_TZ_LIB ON CACHE INTERNAL "")
+FetchContent_Declare(date
+  GIT_REPOSITORY https://github.com/HowardHinnant/date.git
+  GIT_TAG        v3.0.4
+  GIT_SHALLOW    TRUE
+)
+
+FetchContent_MakeAvailable(pugg json date)
 
 FetchContent_Populate(plugin 
   GIT_REPOSITORY https://github.com/pbosetti/mads_plugin.git
@@ -64,7 +71,10 @@ FetchContent_Populate(plugin
   BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/plugin-build
 )
 
-include_directories(${plugin_SOURCE_DIR}/src)
+include_directories(
+  ${plugin_SOURCE_DIR}/src
+  ${date_SOURCE_DIR}/include
+)
 
 
 # MACROS #######################################################################
@@ -110,10 +120,10 @@ endif()
 include_directories(${json_SOURCE_DIR}/include)
 
 # These plugins are always build and use for testing
-add_plugin(buffered)
+add_plugin(buffered LIBS date-tz)
 
 add_executable(acq_test ${SRC_DIR}/acquisitor.cpp)
-
+target_link_libraries(acq_test date-tz)
 
 # INSTALL ######################################################################
 if(APPLE)

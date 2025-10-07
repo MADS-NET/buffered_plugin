@@ -22,11 +22,14 @@ Date: 2025-10-07
 #include <chrono>
 #include <tuple>
 #include <thread>
+#include <date/date.h>
+#include <date/tz.h>
 
 #define DEFAULT_SIZE 100
 
 using namespace std;
 using namespace std::chrono;
+using namespace date;
 using json = nlohmann::json;
 
 
@@ -58,6 +61,10 @@ public:
   struct sample {
     time_point<system_clock, nanoseconds> time;
     T data;
+
+    double time_since(time_point<system_clock, nanoseconds> t0) {
+      return duration_cast<nanoseconds>(time - t0).count() / 1.0E9;
+    }
   };
 
   Acquisitor(json settings, size_t capa = 0) : _settings(settings) {
@@ -82,12 +89,12 @@ public:
     }
     if (is_full()) throw AcquisitorException();
 
-    tuple<time_point<system_clock, nanoseconds>, T> pair(
+    sample s{
       system_clock::now(),
       {_rnd.get(), _rnd.get(), _rnd.get()}
-    );
-    _data.push_back(pair);
-    this_thread::sleep_for(microseconds(50));
+    };
+    _data.push_back(s);
+    this_thread::sleep_for(milliseconds(10));
   }
 
   // Fill the buffer by calling acquire() until the buffer is full
@@ -112,7 +119,7 @@ public:
 private:
   json _settings;
   size_t _capa;
-  vector<tuple<time_point<system_clock, nanoseconds>, T>> _data;
+  vector<sample> _data;
   runif _rnd;
 };
 

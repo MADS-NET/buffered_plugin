@@ -18,6 +18,7 @@
 #include <pugg/Kernel.h>
 
 // other includes as needed here
+#include <chrono>
 #include "acquisitor.hpp"
 
 // Define the name of the plugin
@@ -46,12 +47,14 @@ public:
     if (!_agent_id.empty()) out["agent_id"] = _agent_id;
 
     _acq->fill_buffer();
+    out["data"] = json::array();
     json e = json::array();
-    for (auto &l : _acq->data()) {
-      e.push_back(get<0>(l).time_since_epoch().count());
-      e.push_back(get<1>(l)[0]);
-      e.push_back(get<1>(l)[2]);
-      e.push_back(get<1>(l)[3]);
+    for (auto &sample : _acq->data()) {
+      e.clear();
+      e.push_back(sample.time_since(_today));
+      e.push_back(sample.data[0]);
+      e.push_back(sample.data[1]);
+      e.push_back(sample.data[2]);
       out["data"].push_back(e);
     }
 
@@ -65,6 +68,7 @@ public:
     _params["sd"] = 2;
     _params.merge_patch(*(json *)params);
 
+    _today = floor<chrono::days>(chrono::system_clock::now());
     _acq = make_unique<Acquisitor<>>(_params);
     
   }
@@ -84,6 +88,7 @@ public:
 private:
   // Define the fields that are used to store internal resources
   unique_ptr<Acquisitor<>> _acq;
+  chrono::time_point<chrono::system_clock, chrono::nanoseconds> _today;
 };
 
 
@@ -113,7 +118,9 @@ int main(int argc, char const *argv[]) {
   json output, params;
 
   // Set example values to params
-  params["test"] = "value";
+  params["capacity"] = 100;
+  params["mean"] = 10;
+  params["sd"] = 2;
 
   // Set the parameters
   plugin.set_params(&params);
@@ -122,7 +129,7 @@ int main(int argc, char const *argv[]) {
   plugin.get_output(output);
 
   // Produce output
-  cout << "Output: " << output << endl;
+  cout << "Output: " << output.dump(2) << endl;
 
   return 0;
 }
