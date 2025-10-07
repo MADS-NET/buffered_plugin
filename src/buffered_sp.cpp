@@ -43,22 +43,32 @@ public:
   // Implement the actual functionality here
   return_type get_output(json &out,
                          std::vector<unsigned char> *blob = nullptr) override {
+    return_type result = return_type::success;
     out.clear();
+    out["data"] = json::array();
     if (!_agent_id.empty()) out["agent_id"] = _agent_id;
 
-    _acq->fill_buffer();
-    out["data"] = json::array();
-    json e = json::array();
-    for (auto &sample : _acq->data()) {
-      e.clear();
-      e.push_back(sample.time_since(_today));
-      e.push_back(sample.data[0]);
-      e.push_back(sample.data[1]);
-      e.push_back(sample.data[2]);
-      out["data"].push_back(e);
+    if (_acq->is_full()) {
+      auto data_copy = _acq->data();
+      _acq->fill_buffer_async();
+      json e = json::array();
+      for (auto &sample : data_copy) {
+        e.clear();
+        e.push_back(sample.time_since(_today));
+        e.push_back(sample.data[0]);
+        e.push_back(sample.data[1]);
+        e.push_back(sample.data[2]);
+        out["data"].push_back(e);
+      }
+    } else {
+      _acq->fill_buffer_async();
     }
-
-    return return_type::success;
+    if (!_acq->loading()) {
+      _error = "Warning: packaging data is slower than acquiring data";
+      result = return_type::warning;
+    }
+    _acq->wait();
+    return result;
   }
 
   void set_params(void const *params) override {
@@ -126,8 +136,10 @@ int main(int argc, char const *argv[]) {
 
   // Process data
   plugin.get_output(output);
-
-  // Produce output
+  cout << "Output: " << output.dump(2) << endl;
+  plugin.get_output(output);
+  cout << "Output: " << output.dump(2) << endl;
+  plugin.get_output(output);
   cout << "Output: " << output.dump(2) << endl;
 
   return 0;

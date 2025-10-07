@@ -22,7 +22,7 @@ The class `SerialportAcquisitor` provides an example. Things to remember when de
 * The derived class must implement its constructor and:
   *  the `setup()` method, that prepared the device for reading data/measurements
   *  and the `acquire()` method, which reads a **single sample** of data and properly pack it into the `Acquisitor::sample` struct
-*  The plugin class file should only be changed to update the `#include` for the acquisitor subclass and by updating the type of the `_acq` smart pointer (at the end of `setup()` and in the list of class members)
+*  The plugin class file should only be changed to update the `#include` for the acquisitor subclass and by updating the type of the `_acq` smart pointer (at the end of `setup()` and in the list of class members). Also the data packaging in `get_output()` must be adapted to the case.
 
 
 ## Supported platforms
