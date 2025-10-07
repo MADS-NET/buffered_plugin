@@ -22,6 +22,7 @@ Date: 2025-10-07
 #include <chrono>
 #include <tuple>
 #include <thread>
+#include <future>
 
 #define DEFAULT_SIZE 100
 
@@ -89,7 +90,7 @@ public:
       {_rnd.get(), _rnd.get(), _rnd.get()}
     };
     _data.push_back(s);
-    this_thread::sleep_for(milliseconds(10));
+    this_thread::sleep_for(milliseconds(250));
   }
 
   // Fill the buffer by calling acquire() until the buffer is full
@@ -104,18 +105,34 @@ public:
     }
   }
 
+  void fill_buffer_async(bool reset = true) {
+    _loading = true;
+    _future_data = async([this, reset]() {
+      this->fill_buffer();
+      _loading = false;
+      return _data;
+    });
+  }
+
+  inline void wait() { _future_data.wait(); }
+
+
   auto &data() const { return _data; }
   T operator[](size_t i) const { return _data[i]; }
   size_t size() const { return _data.size(); }
   size_t capa() const { return _capa; }
   bool is_full() const { return _data.size() == _capa; }
   void reset() { _data.clear(); }
+  future<vector<sample>> &future_data() { return _future_data; }
+  bool loading() const { return _loading; }
 
 protected:
   json _settings;
   size_t _capa;
   vector<sample> _data;
   runif _rnd;
+  future<vector<sample>> _future_data;
+  bool _loading = true;
 };
 
 

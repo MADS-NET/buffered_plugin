@@ -19,7 +19,10 @@ int main() {
 
   cout << "size: " << acq.size() << endl << "capa: " << acq.capa() << endl;
 
-  acq.fill_buffer();
+  acq.fill_buffer_async();
+
+  acq.wait();
+
 
   for (auto &v : acq.data()) {
 
