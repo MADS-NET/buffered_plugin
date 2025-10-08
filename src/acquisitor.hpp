@@ -90,7 +90,7 @@ public:
       {_rnd.get(), _rnd.get(), _rnd.get()}
     };
     _data.push_back(s);
-    this_thread::sleep_for(milliseconds(250));
+    this_thread::sleep_for(milliseconds(20));
   }
 
   // Fill the buffer by calling acquire() until the buffer is full

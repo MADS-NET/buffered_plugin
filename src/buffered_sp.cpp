@@ -54,11 +54,8 @@ public:
       json e = json::array();
       // Fill the data section here
       for (auto &sample : data_copy) {
-        e.clear();
-        e.push_back(sample.time_since(_today));
-        e.push_back(sample.data[0]);
-        e.push_back(sample.data[1]);
-        e.push_back(sample.data[2]);
+        e = sample.data;
+        e.insert(e.begin(), sample.time_since(_today));
         out["data"].push_back(e);
       }
     } else {
