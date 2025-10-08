@@ -12,6 +12,7 @@ int main() {
   fft_data_t *fft = fft_init(exp, freq);
   fft_set_win_size(fft, 10);
   fft_set_nsigma(fft, 2);
+  // if you set an output file, then the analysis will be saved (useful in debug)
   fft_set_output_file(fft, "fft.txt");
 
   double t, dt = 1.0 / freq;
