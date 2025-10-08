@@ -11,7 +11,7 @@
 # Creation date: 2025-10-07T09:21:48.630+0200
 # NOTICE: MADS Version 1.4.0
 cmake_minimum_required(VERSION 3.20)
-project(buffered VERSION 1.4.0 LANGUAGES CXX)
+project(buffered VERSION 1.4.0 LANGUAGES C CXX)
 if(CMAKE_BUILD_TYPE STREQUAL "")
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
 endif()
@@ -124,6 +124,11 @@ add_plugin(buffered)
 add_plugin(buffered_sp LIBS serial)
 
 add_executable(acq_test ${SRC_DIR}/acquisitor.cpp)
+
+add_library(fft STATIC ${SRC_DIR}/fft.c ${SRC_DIR}/peaksearch.c)
+add_executable(fft_test ${SRC_DIR}/fft_test.cpp)
+target_link_libraries(fft_test PUBLIC fft)
+
 
 # INSTALL ######################################################################
 if(APPLE)
