@@ -40,6 +40,20 @@ public:
   // Typically, no need to change this
   string kind() override { return PLUGIN_NAME; }
 
+  double average() {
+    double avg = 0;
+    // calculate the average of _acq->data()
+    return avg;
+  }
+
+  vector<pair<double, double>> peaks() {
+    vector<pair<double, double>> result;
+    // calculate the FFT
+    // then extract the peaks from FFT and store them in result,
+    // which is a vector of pairs (frequency,amplitude)
+    return result;
+  }
+
   // Implement the actual functionality here
   return_type get_output(json &out,
                          std::vector<unsigned char> *blob = nullptr) override {
@@ -53,6 +67,8 @@ public:
       _acq->fill_buffer_async();
       json e = json::array();
       // Fill the data section here
+      // out["data"]["average"] = average();
+      // out["data"]["peaks"] = peaks();
       for (auto &sample : data_copy) {
         e = sample.data;
         e.insert(e.begin(), sample.time_since(_today));
