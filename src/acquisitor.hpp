@@ -96,6 +96,7 @@ public:
   // Fill the buffer by calling acquire() until the buffer is full
   void fill_buffer(bool reset = true) {
     if (reset) _data.clear();
+    _loading = true;
     while (true) {
       try {
         acquire();
@@ -103,13 +104,13 @@ public:
         break;
       }
     }
+    _loading = false;
   }
 
   void fill_buffer_async(bool reset = true) {
     _loading = true;
     _future_data = async([this, reset]() {
       this->fill_buffer();
-      _loading = false;
       return _data;
     });
   }
@@ -126,7 +127,7 @@ public:
   future<vector<sample>> &future_data() { return _future_data; }
   bool loading() const { return _loading; }
 
-protected:
+  protected:
   json _settings;
   size_t _capa;
   vector<sample> _data;

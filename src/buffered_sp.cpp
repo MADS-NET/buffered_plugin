@@ -52,6 +52,7 @@ public:
       auto data_copy = _acq->data();
       _acq->fill_buffer_async();
       json e = json::array();
+      // Fill the data section here
       for (auto &sample : data_copy) {
         e.clear();
         e.push_back(sample.time_since(_today));
@@ -65,6 +66,7 @@ public:
     }
     if (!_acq->loading()) {
       _error = "Warning: packaging data is slower than acquiring data";
+      cerr << _error << endl;
       result = return_type::warning;
     }
     _acq->wait();
